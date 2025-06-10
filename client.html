@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Đăng nhập & Truyền file</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { 
+            background: linear-gradient(120deg, #2980b9, #8e44ad); 
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+        }
+        .centered { 
+            max-width: 800px; 
+            margin: 30px auto; 
+            background: rgba(255, 255, 255, 0.95); 
+            padding: 40px; 
+            border-radius: 20px; 
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+        }
+        .centered:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+        }
+        #file-section { display: none; }
+        .form-control {
+            border-radius: 12px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            transition: all 0.3s ease;
+            font-size: 16px;
+        }
+        .form-control:focus {
+            box-shadow: 0 0 0 3px rgba(41, 128, 185, 0.2);
+            border-color: #2980b9;
+        }
+        .btn {
+            padding: 15px;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-size: 16px;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .user-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .file-item {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .file-item:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+        .file-item a {
+            color: #2980b9;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 16px;
+        }
+        .file-item small {
+            color: #6c757d;
+            font-size: 14px;
+        }
+        .icon {
+            margin-right: 10px;
+        }
+        .file-actions {
+            display: flex;
+            gap: 10px;
+        }
+        .download-btn {
+            padding: 8px 15px;
+            border-radius: 8px;
+            background: #28a745;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        .download-btn:hover {
+            background: #218838;
+            color: white;
+            transform: translateY(-2px);
+        }
+        h2 {
+            font-size: 2.2rem;
+            margin-bottom: 1.5rem;
+        }
+        h4 {
+            font-size: 1.5rem;
+            margin-bottom: 1.2rem;
+        }
+        .upload-success {
+            background: #d4edda;
+            padding: 15px;
+            border-radius: 12px;
+            margin: 15px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .file-info {
+            flex-grow: 1;
+        }
+        .user-select {
+            margin-bottom: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 12px;
+        }
+        .user-select select {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        .user-select label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: block;
+        }
+        .file-item .sender-info {
+            font-size: 14px;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+        .file-item .sender-info i {
+            margin-right: 5px;
+        }
+        .user-badge {
+            background: #e9ecef;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 14px;
+            margin-left: 10px;
+        }
+        .auth-tabs {
+            margin-bottom: 20px;
+        }
+        .auth-tabs .nav-link {
+            color: #6c757d;
+            border: none;
+            padding: 10px 20px;
+            font-weight: 600;
+        }
+        .auth-tabs .nav-link.active {
+            color: #2980b9;
+            border-bottom: 2px solid #2980b9;
+        }
+        .remember-me {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+        }
+        .remember-me input {
+            margin-right: 8px;
+        }
+        .register-link {
+            text-align: center;
+            margin-top: 15px;
+        }
+        .register-link a {
+            color: #2980b9;
+            text-decoration: none;
+        }
+        .register-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="centered" id="login-section">
+        <h2 class="text-center mb-4"><i class="fas fa-user-circle icon"></i>Đăng nhập</h2>
+        <ul class="nav nav-tabs auth-tabs" id="authTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="login-tab" data-bs-toggle="tab" data-bs-target="#login-form" type="button" role="tab">Đăng nhập</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="register-tab" data-bs-toggle="tab" data-bs-target="#register-form" type="button" role="tab">Đăng ký</button>
+            </li>
+        </ul>
+        <div class="tab-content" id="authTabContent">
+            <div class="tab-pane fade show active" id="login-form" role="tabpanel">
+                <input type="text" id="username" class="form-control mb-3" placeholder="Tên đăng nhập">
+                <input type="password" id="password" class="form-control mb-3" placeholder="Mật khẩu">
+                <div class="remember-me">
+                    <input type="checkbox" id="rememberMe">
+                    <label for="rememberMe">Ghi nhớ đăng nhập</label>
+                </div>
+                <button class="btn btn-primary w-100" onclick="login()">
+                    <i class="fas fa-sign-in-alt icon"></i>Đăng nhập
+                </button>
+                <div id="login-result" class="mt-3 text-center"></div>
+            </div>
+            <div class="tab-pane fade" id="register-form" role="tabpanel">
+                <input type="text" id="reg-username" class="form-control mb-3" placeholder="Tên đăng nhập">
+                <input type="password" id="reg-password" class="form-control mb-3" placeholder="Mật khẩu">
+                <input type="password" id="reg-confirm-password" class="form-control mb-3" placeholder="Xác nhận mật khẩu">
+                <button class="btn btn-success w-100" onclick="register()">
+                    <i class="fas fa-user-plus icon"></i>Đăng ký
+                </button>
+                <div id="register-result" class="mt-3 text-center"></div>
+            </div>
+        </div>
+    </div>
+    <div class="centered" id="file-section">
+        <div class="user-info">
+            <i class="fas fa-user-circle fa-3x"></i>
+            <div>
+                <h4 class="mb-0">Xin chào, <span id="user-display"></span></h4>
+                <small class="text-muted">Đã đăng nhập thành công</small>
+            </div>
+            <button class="btn btn-danger ms-auto" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i> Đăng xuất
+            </button>
+        </div>
+        <h2 class="text-center mb-4"><i class="fas fa-cloud-upload-alt icon"></i>Truyền file</h2>
+        <div class="user-select">
+            <label><i class="fas fa-user-friends"></i> Chọn người nhận:</label>
+            <select id="receiver-select" class="form-control">
+                <option value="">-- Chọn người nhận --</option>
+            </select>
+        </div>
+        <input type="file" id="fileInput" class="form-control mb-3">
+        <button class="btn btn-success w-100" onclick="uploadFile()">
+            <i class="fas fa-upload icon"></i>Upload
+        </button>
+        <div id="upload-result" class="mt-3"></div>
+        <hr class="my-4">
+        <h4 class="mb-3"><i class="fas fa-list icon"></i>Danh sách file:</h4>
+        <div id="file-list"></div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentUser = '';
+        let userList = [];
+        // Cấu hình URL server - thay đổi địa chỉ này thành địa chỉ server của bạn
+        const SERVER_URL = 'http://127.0.0.1:5000';
+
+        // Kiểm tra thông tin đăng nhập đã lưu
+        window.onload = function() {
+            const savedUsername = localStorage.getItem('username');
+            const savedPassword = localStorage.getItem('password');
+            if (savedUsername && savedPassword) {
+                document.getElementById('username').value = savedUsername;
+                document.getElementById('password').value = savedPassword;
+                document.getElementById('rememberMe').checked = true;
+            }
+        }
+
+        function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const rememberMe = document.getElementById('rememberMe').checked;
+
+            fetch(`${SERVER_URL}/login`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({username, password})
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === "success") {
+                    if (rememberMe) {
+                        localStorage.setItem('username', username);
+                        localStorage.setItem('password', password);
+                    } else {
+                        localStorage.removeItem('username');
+                        localStorage.removeItem('password');
+                    }
+                    currentUser = username;
+                    document.getElementById('login-section').style.display = 'none';
+                    document.getElementById('file-section').style.display = 'block';
+                    document.getElementById('user-display').textContent = username;
+                    loadUserList();
+                    loadFileList();
+                } else {
+                    document.getElementById('login-result').innerHTML = 
+                        `<span class='text-danger'><i class='fas fa-exclamation-circle'></i> ${data.message}</span>`;
+                }
+            });
+        }
+
+        function register() {
+            const username = document.getElementById('reg-username').value;
+            const password = document.getElementById('reg-password').value;
+            const confirmPassword = document.getElementById('reg-confirm-password').value;
+
+            if (password !== confirmPassword) {
+                document.getElementById('register-result').innerHTML = 
+                    "<span class='text-danger'><i class='fas fa-exclamation-circle'></i> Mật khẩu xác nhận không khớp!</span>";
+                return;
+            }
+
+            fetch(`${SERVER_URL}/register`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({username, password})
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === "success") {
+                    document.getElementById('register-result').innerHTML = 
+                        `<span class='text-success'><i class='fas fa-check-circle'></i> ${data.message}</span>`;
+                    // Chuyển về tab đăng nhập
+                    document.getElementById('login-tab').click();
+                    // Điền thông tin đăng nhập
+                    document.getElementById('username').value = username;
+                    document.getElementById('password').value = password;
+                } else {
+                    document.getElementById('register-result').innerHTML = 
+                        `<span class='text-danger'><i class='fas fa-exclamation-circle'></i> ${data.message}</span>`;
+                }
+            });
+        }
+
+        function loadUserList() {
+            fetch(`${SERVER_URL}/list_users`)
+            .then(res => res.json())
+            .then(users => {
+                userList = users;
+                const select = document.getElementById('receiver-select');
+                select.innerHTML = '<option value="">-- Chọn người nhận --</option>';
+                users.forEach(user => {
+                    if (user !== currentUser) {
+                        select.innerHTML += `<option value="${user}">${user}</option>`;
+                    }
+                });
+            });
+        }
+
+        function uploadFile() {
+            const fileInput = document.getElementById('fileInput');
+            const receiver = document.getElementById('receiver-select').value;
+            const file = fileInput.files[0];
+
+            if (!file) {
+                document.getElementById('upload-result').innerHTML = 
+                    "<span class='text-warning'><i class='fas fa-exclamation-triangle'></i> Vui lòng chọn file!</span>";
+                return;
+            }
+
+            if (!receiver) {
+                document.getElementById('upload-result').innerHTML = 
+                    "<span class='text-warning'><i class='fas fa-exclamation-triangle'></i> Vui lòng chọn người nhận!</span>";
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('sender', currentUser);
+            formData.append('receiver', receiver);
+
+            fetch(`${SERVER_URL}/upload`, {
+                method: 'POST',
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === "uploaded") {
+                    document.getElementById('upload-result').innerHTML = `
+                        <div class="upload-success">
+                            <i class="fas fa-check-circle fa-2x text-success"></i>
+                            <div class="file-info">
+                                <h5 class="mb-1">Upload thành công!</h5>
+                                <p class="mb-0">SHA-256: ${data.sha256}</p>
+                                <p class="mb-0">Người nhận: ${receiver}</p>
+                            </div>
+                            <a href="${SERVER_URL}/download/${file.name}" class="download-btn">
+                                <i class="fas fa-download"></i> Tải về
+                            </a>
+                        </div>`;
+                    loadFileList();
+                }
+            });
+        }
+
+        function loadFileList() {
+            fetch(`${SERVER_URL}/list_files`)
+            .then(res => res.json())
+            .then(files => {
+                const list = document.getElementById('file-list');
+                list.innerHTML = '';
+                files.forEach(file => {
+                    if (file.receiver === currentUser || file.sender === currentUser) {
+                        list.innerHTML += `
+                            <div class="file-item">
+                                <div>
+                                    <a href="${SERVER_URL}/download/${file.name}" target="_blank">
+                                        <i class="fas fa-file"></i> ${file.name}
+                                    </a>
+                                    <div class="sender-info">
+                                        <i class="fas fa-user"></i> Người gửi: ${file.sender}
+                                        <span class="user-badge">
+                                            <i class="fas fa-user-check"></i> Người nhận: ${file.receiver}
+                                        </span>
+                                    </div>
+                                    <small><i class="fas fa-fingerprint"></i> SHA-256: ${file.sha256}</small>
+                                </div>
+                                <div class="file-actions">
+                                    <a href="${SERVER_URL}/download/${file.name}" class="download-btn">
+                                        <i class="fas fa-download"></i> Tải về
+                                    </a>
+                                </div>
+                            </div>`;
+                    }
+                });
+            });
+        }
+
+        function logout() {
+            // Chỉ xóa thông tin đăng nhập nếu không có tùy chọn "Ghi nhớ đăng nhập"
+            if (!document.getElementById('rememberMe').checked) {
+                localStorage.removeItem('username');
+                localStorage.removeItem('password');
+            }
+            
+            // Reset form đăng nhập
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+            document.getElementById('rememberMe').checked = false;
+            
+            // Chuyển về màn hình đăng nhập
+            document.getElementById('file-section').style.display = 'none';
+            document.getElementById('login-section').style.display = 'block';
+            
+            // Reset các trường khác
+            currentUser = '';
+            document.getElementById('file-list').innerHTML = '';
+            document.getElementById('upload-result').innerHTML = '';
+            document.getElementById('receiver-select').innerHTML = '<option value="">-- Chọn người nhận --</option>';
+        }
+    </script>
+</body>
+</html>
